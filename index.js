@@ -3,65 +3,51 @@ const app = express();
 const port = process.env.PORT || 3000;
 const amqp = require('amqplib/callback_api');
 let amqpConn = null;
+let channel = null;
 let message = 'por iniciar';
-const conectionURL = 'amqp://muvtbrqj:KNrsfqhxsL9-TymvNnooK4lJ-Iv_HQxQ@toad.rmq.cloudamqp.com/muvtbrqj';
-//process.env.CLOUDAMQP_URL || 'amqp://pxojdlzo:AAQwHpLaTEGXbGNw0eaVS2KAldUnM_Fm@baboom.rmq.cloudamqp.com/pxojdlzo npm start';
+const conectionURL = process.env.CLOUDAMQP_URL;
 
 function init() {
-  amqpConn.createChannel(function(err, ch) {
-    var q = 'messages';
+    
+  var q = 'messages';
 
-    ch.assertQueue(q, {durable: false});
-    ch.consume(q, function(msg) {
-      console.log(" [x] Received %s", msg.content.toString());
-      message = msg.content.toString()
-    }, {noAck: true});
-  });
+  channel.assertQueue(q, {durable: false});
+  channel.consume(q, function(msg) {
+    message = msg.content.toString();
+  }, {noAck: true});
+  
+}
+
+function publishResult() {
+
+  var q = 'result';
+
+  ch.assertQueue(q, {durable: false});
+  // Note: on Node 6 Buffer.from(msg) should be used
+  ch.sendToQueue(q, new Buffer('Hello World!'));
+  
+}
+
+function publishStatus() {
+  
+  var q = 'status';
+
+  channel.assertQueue(q, {durable: false});
+  // Note: on Node 6 Buffer.from(msg) should be used
+  channel.sendToQueue(q, new Buffer('Hello World!'));
+  
 }
 
 amqp.connect(conectionURL, function(err, conn) {
-
-  if(!conn){
-    console.log('no se pudo conectar...');
-    return null;
-  }
-
-  amqpConn = conn;
-
-  init();
-
-  /* conn.createChannel(function(err, ch) {
-    var q = 'hello';
-
-    ch.assertQueue(q, {durable: false});
-    // Note: on Node 6 Buffer.from(msg) should be used
-    ch.sendToQueue(q, new Buffer('Hello World!'));
-    console.log(" [x] Sent 'Hello World!'");
-    ch.close(function() {conn.close()})
-  }); */
-});
-
-
-/*
-amqp.connect(conectionURL, function(err, conn) {
-
-  if(!conn){
-    console.log('no se pudo conectar 2...');
-    return null;
-  }
+  
+  amqpConn = conn;  
 
   conn.createChannel(function(err, ch) {
-    var q = 'hello';
-
-    ch.assertQueue(q, {durable: false});
-    console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", q);
-    ch.consume(q, function(msg) {
-      console.log(" [x] Received %s", msg.content.toString());
-      amqpConn = msg.content.toString()
-    }, {noAck: true});
+    channel = ch;
+    init();
   });
+
 });
-*/
 
 app.get("/", function(request, response) {
   console.log(message);
@@ -79,7 +65,7 @@ process
 
 function shutdown(signal) {
   return (err) => {
-
+    channel.close();
     amqpConn.close();
     process.exit(err ? 1 : 0);
 
