@@ -14,7 +14,7 @@ function init() {
     ch.assertQueue(q, {durable: false});
     ch.consume(q, function(msg) {
       console.log(" [x] Received %s", msg.content.toString());
-      amqpConn = msg.content.toString()
+      message = msg.content.toString()
     }, {noAck: true});
   });
 }
@@ -64,8 +64,8 @@ amqp.connect(conectionURL, function(err, conn) {
 */
 
 app.get("/", function(request, response) {
-  console.log(amqpConn);
-  response.send(amqpConn);
+  console.log(message);
+  response.send(message);
 });
 
 app.listen(port, function() {
