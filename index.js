@@ -3,8 +3,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 const amqp = require('amqplib/callback_api');
 let amqpConn = 'por iniciar';
-const conectionURL = process.env.CLOUDAMQP_URL || 'amqp://pxojdlzo:AAQwHpLaTEGXbGNw0eaVS2KAldUnM_Fm@baboon.rmq.cloudamqp.com/pxojdlzo';
-//process.env.CLOUDAMQP_URL + "?heartbeat=60"
+const conectionURL = process.env.CLOUDAMQP_URL;
+
 amqp.connect(conectionURL, function(err, conn) {
   conn.createChannel(function(err, ch) {
     var q = 'hello';
