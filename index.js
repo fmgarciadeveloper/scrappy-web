@@ -9,32 +9,36 @@ const conectionURL = process.env.CLOUDAMQP_URL;
 
 function init() {
     
-  var q = 'messages';
+  const q = 'messages';
 
   channel.assertQueue(q, {durable: false});
   channel.consume(q, function(msg) {
     message = msg.content.toString();
+    publishStatus(message);
   }, {noAck: true});
   
 }
 
-function publishResult() {
+function publishResult(data) {
 
-  var q = 'result';
+  const q = 'result';
 
   ch.assertQueue(q, {durable: false});
-  // Note: on Node 6 Buffer.from(msg) should be used
-  ch.sendToQueue(q, new Buffer('Hello World!'));
+  ch.sendToQueue(q, Buffer.from('Hello World!'));
   
 }
 
-function publishStatus() {
+function publishStatus(data) {
   
-  var q = 'status';
+  const q = 'status';
+  const search = JSON.parse(data);
+  const status = {
+    id: search.id,
+    status:'processing'
+  };
 
   channel.assertQueue(q, {durable: false});
-  // Note: on Node 6 Buffer.from(msg) should be used
-  channel.sendToQueue(q, new Buffer('Hello World!'));
+  channel.sendToQueue(q, Buffer.from(JSON.stringify(status)));
   
 }
 
