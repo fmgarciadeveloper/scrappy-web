@@ -89,6 +89,5 @@ function shutdown(signal) {
     channel.close();
     amqpConn.close();
     process.exit(err ? 1 : 0);
-
   };
 }
