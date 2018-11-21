@@ -5,7 +5,7 @@ const port = process.env.PORT || 3001;
 const amqp = require('amqplib/callback_api');
 let amqpConn = null;
 let channel = null;
-let message = 'por iniciar';
+let messageInit = 'por iniciar';
 const conectionURL = process.env.CLOUDAMQP_URL;
 
 function init() {
@@ -14,7 +14,7 @@ function init() {
 
   channel.assertQueue(q, {durable: false});
   channel.consume(q, function(msg) {
-    message = msg.content.toString();
+    const message = msg.content.toString();
     const search = JSON.parse(message);
 
     publishStatus(search, 'processing');
@@ -71,8 +71,8 @@ amqp.connect(conectionURL, function(err, conn) {
 });
 
 app.get("/", function(request, response) {
-  console.log(message);
-  response.send(message);
+ 
+  response.send(messageInit);
 });
 
 app.listen(port, function() {
