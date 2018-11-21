@@ -4,7 +4,17 @@ module.exports = function run (searchTerm) {
   return new Promise(async (resolve, reject) => {
     try {
       
-      const browser = await puppeteer.launch({headless: true});
+      const browser = await puppeteer.launch(
+        {
+          headless: true,
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--single-process'
+          ],
+        }
+      );
       const page = await browser.newPage();
 
       page.setDefaultNavigationTimeout(0);
