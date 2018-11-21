@@ -1,17 +1,16 @@
 const puppeteer = require('puppeteer');
-const rabbitmq = require('./rabbitmq');
 
 module.exports = function run (searchTerm) {
   return new Promise(async (resolve, reject) => {
     try {
-
+      
       const browser = await puppeteer.launch({headless: true});
       const page = await browser.newPage();
 
       page.setDefaultNavigationTimeout(0);
 
       await page.goto('https://www.easy.com.ar/webapp/wcs/stores/servlet/es/easyar', { waitUntil:'load' });
-
+      
       // Type into search box.
       await page.type('#header-search input', searchTerm.searchQuery);
 
@@ -19,27 +18,38 @@ module.exports = function run (searchTerm) {
         await page.click('.header-userbar-icons2'),
         await page.waitForNavigation()
       ]);
-
-      await page.waitForSelector('#breadcrumb');
-      const breadcrumb = await page.$$eval('#breadcrumb > .breadcrumb_links > a',
-        a => a[1].innerText
-      );
-
+      
       // Wait for the results page to load and display the results.;
-      //await page.waitForSelector('.itemhover');
+      await page.waitForSelector('.itemhover');
 
-      //const products = await page.$$('.itemhover');
+      // se obtiene el numero de productos para iterarlos y obtener sus datos
+      const products = await page.$$('.itemhover');
+      const totalProducts = products.length;
 
-      const img = await page.evaluate(() => {
+      /* const img = await page.evaluate(() => {
         const imgs = Array.from(document.querySelectorAll('.itemhover > img'));
         return imgs[0].src; 
-      });
-     
-      for (let i = 0; i < 1; i++) { 
+      }); */
 
+      const img = 'n/a';
+      
+      const results = [];
+      for (let i = 0; i < totalProducts; i++) { 
+
+        await page.goto('https://www.easy.com.ar/webapp/wcs/stores/servlet/es/easyar', { waitUntil:'load' });
+      
+        // Type into search box.
+        await page.type('#header-search input', searchTerm.searchQuery);
+
+        await Promise.all([
+          await page.click('.header-userbar-icons2'),
+          await page.waitForNavigation()
+        ]);
+        
         // Wait for the results page to load and display the results.;
-        //await page.waitForSelector('.itemhover');
+        await page.waitForSelector('.itemhover');
 
+        // se obtiene el numero de productos para iterarlos y obtener sus datos
         const products = await page.$$('.itemhover');
         
         const product = products[i];
@@ -48,11 +58,17 @@ module.exports = function run (searchTerm) {
           await product.click(),
           await page.waitForNavigation()
         ]);
+        
+        await page.waitForSelector('.navigator');
+        const category = await page.$$eval('#breadcrumb > a',
+          a => a[1].innerText
+        );
+
+        const result = {};
     
         await page.waitForSelector('.product-all');
 
-        const result = {};
-        result.searchTerm = searchTerm;
+        result.searchTerm = searchTerm.searchQuery;
         result.product_name = await page.$eval('.prod-title', div => div.innerText);
         result.price = await page.$eval('.price-e', span => span.innerText.trim());
         result.sku = await page.$$eval('.product-description > span.size-10', spans => spans[1].innerHTML);
@@ -66,37 +82,28 @@ module.exports = function run (searchTerm) {
             return description;
           }
         );
-
-        result.price_with_discount = await page.$eval('#precio-tarj-mas > span#tarj-mas-edit', 
-          (span) => {
-            if(span){
-              return span.innerText.trim();
-            }else{
-              return "0.0";
-            }
-          }
-        );
+        
+        try {
+          result.price_with_discount = await page.$eval('#precio-tarj-mas > span#tarj-mas-edit', 
+            (span) =>  span.innerText.trim()
+          );
+        }catch(e) {
+          result.price_with_discount = 0.0;
+        }
+        
         result.imagesUrl = img; 
-        result.cateroy = breadcrumb;
-                
-        /* await page.goto('https://www.easy.com.ar/webapp/wcs/stores/servlet/es/easyar', { waitUntil:'load' });
 
-        // Type into search box.
-        await page.type('#header-search input', 'Lavarropas');
-        await Promise.all([
-          await page.click('.header-userbar-icons2'),
-          await page.waitForNavigation()
-        ]); 
-        await page.waitForSelector('.itemhover'); */
+        result.category = category;
 
+        results.push(result);   
+        
       }
         
       browser.close();
 
-      //rabbitmq.publishStatus(searchTerm, 'processed');
-
-      return resolve(result);
+      return resolve(results);
     } catch (e) {
+      
         return reject(e);
     }
   })

@@ -1,7 +1,7 @@
 const express = require("express");
 const easy = require('./easy');
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 const amqp = require('amqplib/callback_api');
 let amqpConn = null;
 let channel = null;
@@ -17,7 +17,8 @@ function init() {
     message = msg.content.toString();
     const search = JSON.parse(message);
 
-    publishStatus(message);
+    publishStatus(search, 'processing');
+
     easy(search)
       .then(
         (result) => {
@@ -26,7 +27,8 @@ function init() {
         }
       )
       .catch(
-        () => {
+        (err) => {
+          console.log(err);
           publishStatus(search, 'failed');
         }
       );
@@ -39,8 +41,8 @@ function publishResult(data) {
 
   const q = 'result';
 
-  ch.assertQueue(q, {durable: false});
-  ch.sendToQueue(q, Buffer.from('Hello World!'));
+  channel.assertQueue(q, {durable: false});
+  channel.sendToQueue(q, Buffer.from(JSON.stringify(data)));
   
 }
 
@@ -48,10 +50,10 @@ function publishStatus(data, status) {
   
   const q = 'status';
   const updateStatus = {
-    id: data.id,
-    status:status
+    id : data.id,
+    status : status
   };
-
+ 
   channel.assertQueue(q, {durable: false});
   channel.sendToQueue(q, Buffer.from(JSON.stringify(updateStatus)));
   
