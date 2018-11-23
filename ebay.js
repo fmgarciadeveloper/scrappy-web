@@ -102,8 +102,6 @@ module.exports = function run (searchTerm) {
         
       browser.close();
 
-      console.log(results);
-
       return resolve(results);
     } catch (e) {
       
