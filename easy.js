@@ -34,7 +34,7 @@ module.exports = function run (searchTerm) {
 
       // se obtiene el numero de productos para iterarlos y obtener sus datos
       const products = await page.$$('.itemhover');
-      const totalProducts = products.length;
+      const totalProducts = 2;//products.length;
 
       /* const img = await page.evaluate(() => {
         const imgs = Array.from(document.querySelectorAll('.itemhover > img'));

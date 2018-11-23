@@ -1,5 +1,7 @@
 const express = require("express");
 const easy = require('./easy');
+const ebay = require('./ebay');
+const amazon = require('./amazon');
 const app = express();
 const port = process.env.PORT || 3001;
 const amqp = require('amqplib/callback_api');
@@ -19,19 +21,60 @@ function init() {
 
     publishStatus(search, 'processing');
 
-    easy(search)
-      .then(
-        (result) => {
-          publishStatus(search, 'processed');
-          publishResult(result);
-        }
-      )
-      .catch(
-        (err) => {
-          console.log(err);
-          publishStatus(search, 'failed');
-        }
-      );
+    console.log('Busqueda >>> '+search.searchQuery);
+
+    switch(search.provider) {
+      case 'easy':
+        console.log('Provider 1 >>> '+search.provider);
+        easy(search)
+        .then(
+          (result) => {
+            publishStatus(search, 'processed');
+            publishResult(result);
+          }
+        )
+        .catch(
+          (err) => {
+            console.log(err);
+            publishStatus(search, 'failed');
+          }
+        );
+        break;
+      case 'ebay':
+       console.log('Provider 2 >>> '+search.provider);
+        ebay(search)
+        .then(
+          (result) => {
+            publishStatus(search, 'processed');
+            publishResult(result);
+          }
+        )
+        .catch(
+          (err) => {
+            console.log(err);
+            publishStatus(search, 'failed');
+          }
+        );
+        break;
+      case 'amazon':
+        console.log('Provider 3 >>> '+search.provider);
+        amazon(search)
+        .then(
+          (result) => {
+            publishStatus(search, 'processed');
+            publishResult(result);
+          }
+        )
+        .catch(
+          (err) => {
+            console.log(err);
+            publishStatus(search, 'failed');
+          }
+        );
+        break;
+      default:
+          console.log('ninguno');
+    }   
     
   }, {noAck: true});
   
