@@ -122,8 +122,10 @@ function publishStatus(data, status) {
 amqp.connect(conectionURL, function(err, conn) {
   
   amqpConn = conn;  
-
+  console.log('Conectado a Rabbitm');
   conn.createChannel(function(err, ch) {
+
+    console.log('Channel creado');
     channel = ch;
     init();
   });
@@ -146,6 +148,7 @@ process
 
 function shutdown(signal) {
   return (err) => {
+    console.log('ERROR: '+err);
     channel.close();
     amqpConn.close();
     process.exit(err ? 1 : 0);

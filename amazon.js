@@ -6,12 +6,12 @@ module.exports = function run (searchTerm) {
       
       const browser = await puppeteer.launch(
         {
-          headless: true,
+          headless: false,
           args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
-            //'--single-process'
+            '--single-process'
           ],
         }
       );
@@ -24,9 +24,11 @@ module.exports = function run (searchTerm) {
       
       await Promise.all([
         await page.click('input.nav-input'),
-        await page.waitForSelector('#resultsCol')
+        await page.waitForNavigation()
       ]);
       
+      await page.waitForSelector('#resultsCol')
+
       // se obtiene el numero de productos para iterarlos y obtener sus datos
       const products = await page.$$('a.a-link-normal.a-text-normal');
       const totalProducts = 2;//products.length;
@@ -94,10 +96,10 @@ module.exports = function run (searchTerm) {
       }
         
       browser.close();
-
+      console.log('TOTAL FILES '+ results.length);
       return resolve(results);
     } catch (e) {
-      
+        console.log('MERCADO_LIBRE :'+e);
         return reject(e);
     }
   })

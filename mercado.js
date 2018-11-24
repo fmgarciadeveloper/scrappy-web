@@ -6,7 +6,7 @@ module.exports = function run (searchTerm) {
       
       const browser = await puppeteer.launch(
         {
-          headless: true,
+          headless: false,
           args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -28,8 +28,11 @@ module.exports = function run (searchTerm) {
         await page.click('.nav-search-btn'),
         await page.waitForNavigation()
       ]);
+
+      await page.waitForSelector('#results-section');
       
       const products = await page.$$('.item-link.item__js-link')
+      console.log(products.length);
       const totalProducts = 2;//products.length;
       
       const img = 'n/a';
@@ -46,8 +49,6 @@ module.exports = function run (searchTerm) {
           await page.click('.nav-search-btn'),
           await page.waitForNavigation()
         ]);
-
-        await page.waitForSelector('.results-section');
         
         const products = await page.$$('.item-link.item__js-link')      
         const product = products[i];
@@ -92,10 +93,10 @@ module.exports = function run (searchTerm) {
       }
         
       browser.close();
-
+      console.log('TOTAL FILES '+ results.length);
       return resolve(results);
     } catch (e) {
-      
+        console.log('MERCADO_LIBRE :'+e);
         return reject(e);
     }
   })
