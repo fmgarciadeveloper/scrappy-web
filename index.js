@@ -2,6 +2,7 @@ const express = require("express");
 const easy = require('./easy');
 const ebay = require('./ebay');
 const amazon = require('./amazon');
+const mercado = require('./mercado');
 const app = express();
 const port = process.env.PORT || 3001;
 const amqp = require('amqplib/callback_api');
@@ -55,10 +56,26 @@ function init() {
             publishStatus(search, 'failed');
           }
         );
-        break;
+        break;      
       case 'amazon':
         console.log('Provider 3 >>> '+search.provider);
         amazon(search)
+        .then(
+          (result) => {
+            publishStatus(search, 'processed');
+            publishResult(result);
+          }
+        )
+        .catch(
+          (err) => {
+            console.log(err);
+            publishStatus(search, 'failed');
+          }
+        );
+        break;
+      case 'mercado':
+        console.log('Provider 4 >>> '+search.provider);
+        mercado(search)
         .then(
           (result) => {
             publishStatus(search, 'processed');
