@@ -46,6 +46,8 @@ module.exports = function run (searchTerm) {
           await page.click('.nav-search-btn'),
           await page.waitForNavigation()
         ]);
+
+        await page.waitForSelector('.results-section');
         
         const products = await page.$$('.item-link.item__js-link')      
         const product = products[i];
