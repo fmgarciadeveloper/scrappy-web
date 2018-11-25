@@ -33,7 +33,9 @@ module.exports = function run (searchTerm) {
       
       const products = await page.$$('.item-link.item__js-link')
       console.log(products.length);
-      const totalProducts = 2;//products.length;
+      const iterate = parseInt(searchTerm.iterate);
+      const totalProducts = iterate === -1 ? products.length : iterate;
+      console.log(totalProducts);
       
       const img = 'n/a';
       

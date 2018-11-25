@@ -28,11 +28,11 @@ module.exports = function run (searchTerm) {
         await page.click('#gh-btn'),
         await page.waitForNavigation()
       ]);
-
-      await page.waitForSelector('.s-item');
       
       const products = await page.$$('a.s-item__link');
-      const totalProducts = 2;//products.length;
+      const iterate = parseInt(searchTerm.iterate);
+      const totalProducts = iterate === -1 ? products.length : iterate;
+      console.log(totalProducts);
       
       const img = 'n/a';
       

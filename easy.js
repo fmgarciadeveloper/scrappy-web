@@ -34,7 +34,9 @@ module.exports = function run (searchTerm) {
 
       // se obtiene el numero de productos para iterarlos y obtener sus datos
       const products = await page.$$('.itemhover');
-      const totalProducts = 2;//products.length;
+      const iterate = parseInt(searchTerm.iterate);
+      const totalProducts = iterate === -1 ? products.length : iterate;
+      console.log(totalProducts);
 
       /* const img = await page.evaluate(() => {
         const imgs = Array.from(document.querySelectorAll('.itemhover > img'));
@@ -57,7 +59,7 @@ module.exports = function run (searchTerm) {
         ]);
         
         // Wait for the results page to load and display the results.;
-        //await page.waitForSelector('.itemhover');
+        await page.waitForSelector('.itemhover');
 
         // se obtiene el numero de productos para iterarlos y obtener sus datos
         const products = await page.$$('.itemhover');
