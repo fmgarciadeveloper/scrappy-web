@@ -11,7 +11,7 @@ module.exports = function run (searchTerm) {
             '--no-sandbox',
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
-            '--single-process'
+            //'--single-process'
           ],
         }
       );
